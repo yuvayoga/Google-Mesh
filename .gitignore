@@ -1,0 +1,23 @@
+# Sensitive config
+**/config.js
+**/.env
+
+# Dependencies
+**/node_modules/
+**/dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Zip files
+*.zip
+
+# Debug files
+*.json
+!manifest.json
+!package.json
+!capacitor.config.json
+
+# utility scripts (optional, but safer to exclude if they contain URLs)
+# *.py

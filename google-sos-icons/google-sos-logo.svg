@@ -1,0 +1,35 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Google SOS Logo - Shield with Google Colors -->
+  <defs>
+    <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4285F4;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:#EA4335;stop-opacity:0.1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Shield Background -->
+  <path d="M256 32L96 96V256C96 362 176 448 256 480C336 448 416 362 416 256V96L256 32Z" 
+        fill="url(#shieldGradient)" stroke="#E8EAED" stroke-width="8"/>
+  
+  <!-- Google Color Segments -->
+  <!-- Blue (Top Left) -->
+  <path d="M256 32L96 96V176L256 176V32Z" fill="#4285F4" opacity="0.9"/>
+  
+  <!-- Red (Top Right) -->
+  <path d="M256 32L416 96V176L256 176V32Z" fill="#EA4335" opacity="0.9"/>
+  
+  <!-- Yellow (Bottom Left) -->
+  <path d="M96 256V336C96 362 106 388 126 410L256 336V256H96Z" fill="#FBBC04" opacity="0.9"/>
+  
+  <!-- Green (Bottom Right) -->
+  <path d="M416 256V336C416 362 406 388 386 410L256 336V256H416Z" fill="#34A853" opacity="0.9"/>
+  
+  <!-- SOS Text -->
+  <text x="256" y="280" font-family="Google Sans, Arial, sans-serif" font-size="120" font-weight="900" 
+        fill="white" text-anchor="middle" stroke="#1F1F1F" stroke-width="4" paint-order="stroke">SOS</text>
+  
+  <!-- Emergency Icon -->
+  <circle cx="256" cy="140" r="24" fill="white" opacity="0.9"/>
+  <path d="M256 120L260 132L272 132L262 140L266 152L256 144L246 152L250 140L240 132L252 132Z" 
+        fill="#EA4335" stroke="white" stroke-width="2"/>
+</svg>

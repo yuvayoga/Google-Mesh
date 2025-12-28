@@ -1,0 +1,17 @@
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file 'D:\oneapp\mobile-app\android\build.gradle' line: 44
+
+* What went wrong:
+A problem occurred evaluating root project 'android'.
+> Could not find method java() for arguments [build_duma4ivsz5ophqrim90y4vavt$_run_closure2$_closure11@5f8836c] on root project 'android' of type org.gradle.api.Project.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 2s

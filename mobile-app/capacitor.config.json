@@ -1,0 +1,15 @@
+{
+  "appId": "com.google.mesh",
+  "appName": "Google Mesh",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "Geolocation": {
+      "permissions": [
+        "location"
+      ]
+    }
+  }
+}

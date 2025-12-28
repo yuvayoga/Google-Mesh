@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Google Mesh</string>
+    <string name="title_activity_main">Google Mesh</string>
+    <string name="package_name">com.google.mesh</string>
+    <string name="custom_url_scheme">com.google.mesh</string>
+</resources>

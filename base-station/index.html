@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Google Mesh Control Room</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700;900&family=Roboto:wght@300;400;500;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Leaflet Map (Free & No Billing) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<audio id="sosAlertSound" preload="auto">
+  <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+</audio>
+
+
+<body>
+
+  <!-- LOGIN OVERLAY -->
+  <div id="loginOverlay" class="login-overlay">
+    <div class="login-card">
+      <div class="login-logo">
+        <svg width="180" height="50" viewBox="0 0 200 60">
+          <text x="0" y="45" font-family="Google Sans" font-weight="bold" font-size="50">
+            <tspan fill="#4285F4">m</tspan>
+            <tspan fill="#EA4335">e</tspan>
+            <tspan fill="#FBBC04">s</tspan>
+            <tspan fill="#34A853">h</tspan>
+          </text>
+        </svg>
+      </div>
+      <h2>Control Room Login</h2>
+      <p>Enter your credentials to access the mesh network.</p>
+
+      <div class="input-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" placeholder="admin@googlemesh.com" required>
+      </div>
+
+      <div class="input-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••" required>
+      </div>
+
+      <button id="loginBtn" class="login-btn" onclick="handleLogin()">
+        <span id="loginBtnText">Sign In</span>
+        <div id="loginLoader" class="loader" style="display:none"></div>
+      </button>
+
+      <div id="loginError" class="error-msg" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- MAIN DASHBOARD (Hidden by default) -->
+  <div id="mainDashboard" style="display:none">
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="logo">
+        <svg width="140" height="40" viewBox="0 0 200 60" style="margin-right: 12px;">
+          <text x="0" y="45" font-family="Google Sans" font-weight="bold" font-size="50">
+            <tspan fill="#4285F4">m</tspan>
+            <tspan fill="#EA4335">e</tspan>
+            <tspan fill="#FBBC04">s</tspan>
+            <tspan fill="#34A853">h</tspan>
+          </text>
+        </svg>
+        <span><b>Google Mesh</b> Control Room</span>
+        <div id="connectionStatus"
+          style="width: 10px; height: 10px; border-radius: 50%; background-color: #ef4444; margin-left: 12px; box-shadow: 0 0 5px #ef4444;"
+          title="Disconnected"></div>
+      </div>
+      <div class="topbar-right">
+        <div class="count-group">
+          <span class="count pending">Pending: <b id="pending">0</b></span>
+          <span class="count rescued">Rescued: <b id="rescued">0</b></span>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="container">
+
+      <!-- SIDEBAR -->
+      <div class="sidebar">
+
+        <!-- TABS -->
+        <div class="tabs">
+          <button id="tabActive" class="tab active-tab" onclick="showTab('active')">
+            SOS REQUESTS
+          </button>
+
+          <button id="tabArchive" class="tab" onclick="showTab('archive')">
+            ARCHIVED
+          </button>
+        </div>
+
+        <!-- TAB CONTENT -->
+        <div class="tab-content">
+
+          <!-- ACTIVE / PENDING VIEW -->
+          <div id="activeView">
+            <div id="sosList"></div>
+          </div>
+
+          <!-- ARCHIVED VIEW -->
+          <div id="archiveView" style="display:none">
+            <div id="archiveList"></div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- MAP -->
+      <div id="map"></div>
+
+      <!-- CHAT PANEL (Floating) -->
+      <div id="chatPanel" class="chat-panel" style="display:none">
+        <div class="chat-header">
+          <div class="chat-title-group">
+            <span id="chatTitle">Chat</span>
+            <span id="chatSubtitle" class="chat-subtitle">Connecting...</span>
+          </div>
+          <button class="close-chat" onclick="closeChat()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div id="chatMessages" class="chat-messages"></div>
+        <div class="chat-input-area">
+          <input type="text" id="chatInput" placeholder="Type a message..." onkeypress="handleChatKey(event)">
+          <button class="send-btn" onclick="sendChatMessage()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+            </svg>
+          </button>
+          <!DOCTYPE html>
+          <html lang="en">
+
+          <head>
+            <meta charset="UTF-8" />
+            <title>Google Mesh Control Room</title>
+
+            <!-- Google Fonts -->
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link
+              href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700;900&family=Roboto:wght@300;400;500;700&display=swap"
+              rel="stylesheet">
+
+            <!-- Leaflet Map (Free & No Billing) -->
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+            <!-- Firebase -->
+            <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+            <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+            <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+            <link rel="stylesheet" href="style.css" />
+          </head>
+
+          <audio id="sosAlertSound" preload="auto">
+            <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+          </audio>
+
+
+          <body>
+
+            <!-- LOGIN OVERLAY -->
+            <div id="loginOverlay" class="login-overlay">
+              <div class="login-card">
+                <div class="login-logo">
+                  <svg width="180" height="50" viewBox="0 0 200 60">
+                    <text x="0" y="45" font-family="Google Sans" font-weight="bold" font-size="50">
+                      <tspan fill="#4285F4">m</tspan>
+                      <tspan fill="#EA4335">e</tspan>
+                      <tspan fill="#FBBC04">s</tspan>
+                      <tspan fill="#34A853">h</tspan>
+                    </text>
+                  </svg>
+                </div>
+                <h2>Control Room Login</h2>
+                <p>Enter your credentials to access the mesh network.</p>
+
+                <div class="input-group">
+                  <label for="email">Email Address</label>
+                  <input type="email" id="email" placeholder="admin@googlemesh.com" required>
+                </div>
+
+                <div class="input-group">
+                  <label for="password">Password</label>
+                  <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+
+                <button id="loginBtn" class="login-btn" onclick="handleLogin()">
+                  <span id="loginBtnText">Sign In</span>
+                  <div id="loginLoader" class="loader" style="display:none"></div>
+                </button>
+
+                <div id="loginError" class="error-msg" style="display:none"></div>
+              </div>
+            </div>
+
+            <!-- MAIN DASHBOARD (Hidden by default) -->
+            <div id="mainDashboard" style="display:none">
+              <!-- TOP BAR -->
+              <div class="topbar">
+                <div class="logo">
+                  <svg width="140" height="40" viewBox="0 0 200 60" style="margin-right: 12px;">
+                    <text x="0" y="45" font-family="Google Sans" font-weight="bold" font-size="50">
+                      <tspan fill="#4285F4">m</tspan>
+                      <tspan fill="#EA4335">e</tspan>
+                      <tspan fill="#FBBC04">s</tspan>
+                      <tspan fill="#34A853">h</tspan>
+                    </text>
+                  </svg>
+                  <span><b>Google Mesh</b> Control Room</span>
+                  <div id="connectionStatus"
+                    style="width: 10px; height: 10px; border-radius: 50%; background-color: #ef4444; margin-left: 12px; box-shadow: 0 0 5px #ef4444;"
+                    title="Disconnected"></div>
+                </div>
+                <div class="topbar-right">
+                  <div class="count-group">
+                    <span class="count pending">Pending: <b id="pending">0</b></span>
+                    <span class="count rescued">Rescued: <b id="rescued">0</b></span>
+                  </div>
+                  <button class="logout-btn" onclick="handleLogout()">Logout</button>
+                </div>
+              </div>
+
+              <!-- MAIN -->
+              <div class="container">
+
+                <!-- SIDEBAR -->
+                <div class="sidebar">
+
+                  <!-- TABS -->
+                  <div class="tabs">
+                    <button id="tabActive" class="tab active-tab" onclick="showTab('active')">
+                      SOS REQUESTS
+                    </button>
+
+                    <button id="tabArchive" class="tab" onclick="showTab('archive')">
+                      ARCHIVED
+                    </button>
+                  </div>
+
+                  <!-- TAB CONTENT -->
+                  <div class="tab-content">
+
+                    <!-- ACTIVE / PENDING VIEW -->
+                    <div id="activeView">
+                      <div id="sosList"></div>
+                    </div>
+
+                    <!-- ARCHIVED VIEW -->
+                    <div id="archiveView" style="display:none">
+                      <div id="archiveList"></div>
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <!-- MAP -->
+                <div id="map"></div>
+
+                <!-- CHAT PANEL (Floating) -->
+                <div id="chatPanel" class="chat-panel" style="display:none">
+                  <div class="chat-header">
+                    <div class="chat-title-group">
+                      <span id="chatTitle">Chat</span>
+                      <span id="chatSubtitle" class="chat-subtitle">Connecting...</span>
+                    </div>
+                    <button class="close-chat" onclick="closeChat()">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div id="chatMessages" class="chat-messages"></div>
+                  <div class="chat-input-area">
+                    <input type="text" id="chatInput" placeholder="Type a message..." onkeypress="handleChatKey(event)">
+                    <button class="send-btn" onclick="sendChatMessage()">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- App Logic -->
+            <script src="config.js"></script>
+            <script src="gemini-service.js?v=2"></script>
+            <script src="app.js"></script>
+
+          </body>
+
+          </html>
